@@ -29,7 +29,7 @@ const ROCKS = `####
     .map((str) => str.split("\n"));
 
 console.log(main(sampleInput));
-// console.log(main(puzzleInput));
+console.log(main(puzzleInput));
 
 /**
  * @param {String} puzzleInput
@@ -43,37 +43,38 @@ function main(puzzleInput) {
 
     let jetIndex = 0;
     let droppedRocks = 0;
-    let prevRocks;
-    while (droppedRocks <= 2023) {
+    let prevRocks = -1;
+
+    function removeEmptyRowsFromChamber(chamber) {
+        return chamber.filter(
+            (row) => row.filter((p) => p === ".").length !== CHAMBER_SIZE
+        );
+    }
+
+    while (droppedRocks < 2022) {
         if (prevRocks !== droppedRocks) {
             prevRocks = droppedRocks;
 
-            chamber = chamber.filter(
-                (row) => row.filter((p) => p === ".").length !== CHAMBER_SIZE
-            );
+            chamber = removeEmptyRowsFromChamber(chamber);
 
             chamber = addRockToChamber(
                 ROCKS[droppedRocks % ROCKS.length],
                 chamber
             );
-
-            // console.log(chamber.map((row) => row.join("")).join("\n"));
         }
 
         // first let the jet move the rock
         const direction = jets[jetIndex % jets.length];
         chamber = move(direction, chamber);
-        // console.log(chamber.map((row) => row.join("")).join("\n"));
         jetIndex++;
 
         // then move down
         chamber = move("v", chamber);
-        // console.log(chamber.map((row) => row.join("")).join("\n"));
     }
 
     const diff = process.hrtime(time);
     console.log(`Script took ${diff[0]} seconds`);
-    return chamber.length;
+    return removeEmptyRowsFromChamber(chamber).length - 1;
 
     function addRockToChamber(rock, chamber) {
         const normalizeRock = [
@@ -81,7 +82,7 @@ function main(puzzleInput) {
                 .map((rowStr) => `..${rowStr}`)
                 .map((rowStr) => rowStr.padEnd(7, ".").split("")),
         ];
-        const emptyRows = [...new Array(ABOVE)].map((row) =>
+        const emptyRows = [...new Array(ABOVE)].map(() =>
             new Array(CHAMBER_SIZE).fill(".")
         );
         return [...normalizeRock, ...emptyRows, ...chamber];
