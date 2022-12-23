@@ -3,8 +3,14 @@ const fs = require("fs");
 const sampleInput = fs.readFileSync("./sample-input.txt", "utf8");
 const puzzleInput = fs.readFileSync("./input.txt", "utf8");
 
+const SAND = "o";
+const FALLING_SAND = "+";
+const AIR = ".";
+const ROCK = "#";
+
 console.log(main(sampleInput));
-// console.log(main(puzzleInput));
+
+console.log(main(puzzleInput));
 
 /**
  * @param {String} puzzleInput
@@ -24,7 +30,7 @@ function main(puzzleInput) {
         rocks.forEach((rock, index) => {
             const [x, y] = rock;
 
-            map[y][x] = "#";
+            map[y][x] = ROCK;
 
             const previousRock = rocks[index - 1];
             if (!previousRock) {
@@ -57,21 +63,22 @@ function main(puzzleInput) {
             while (x !== prevX || y !== prevY) {
                 prevY += yFactor;
                 prevX += xFactor;
-                map[prevY][prevX] = "#";
+                map[prevY][prevX] = ROCK;
             }
         });
     });
 
-    logMap(map);
-    return 0;
-}
+    map[0][500] = FALLING_SAND;
 
-function logMap(_map) {
-    console.log(_map.map((row) => row.join("")).join("\n"));
+    while (drawNextSandPosition(map)) {
+        // it automatically draws
+    }
+
+    return map.reduce((a, b) => [...a, ...b]).filter((point) => point === SAND)
+        .length;
 }
 
 function drawEmptyMap(puzzleInput) {
-    const SAND = [500, 0];
     const map = [];
 
     const matches = puzzleInput.matchAll(/(\d+),(\d+)/g);
@@ -81,7 +88,7 @@ function drawEmptyMap(puzzleInput) {
         Number(match[2]),
     ]);
 
-    positions.push(SAND);
+    positions.push([500, 0]);
 
     const xPositions = positions.map((pos) => pos[0]).sort((a, b) => a - b);
     const yPositions = positions.map((pos) => pos[1]).sort((a, b) => a - b);
@@ -94,9 +101,49 @@ function drawEmptyMap(puzzleInput) {
     for (let y = minY; y <= maxY; y++) {
         map[y] = [];
         for (let x = minX; x <= maxX; x++) {
-            map[y][x] = ".";
+            map[y][x] = AIR;
         }
     }
 
     return map;
+}
+
+function getFallingSandPosition(map) {
+    const y = map.findIndex((row) => row.indexOf(FALLING_SAND) !== -1);
+    const x = map[y].indexOf(FALLING_SAND);
+
+    return [x, y];
+}
+
+function drawNextSandPosition(map) {
+    const [x, y] = getFallingSandPosition(map);
+
+    // move down
+    if (map[y + 1][x] === AIR) {
+        map[y][x] = AIR;
+
+        map[y + 1][x] = FALLING_SAND;
+    } else if (map[y + 1][x - 1] === AIR) {
+        map[y][x] = AIR;
+
+        map[y + 1][x - 1] = FALLING_SAND;
+    } else if (map[y + 1][x + 1] === AIR) {
+        map[y][x] = AIR;
+
+        map[y + 1][x + 1] = FALLING_SAND;
+    } else if (
+        map[y + 1][x - 1] === undefined ||
+        map[y + 1][x] === undefined ||
+        map[y + 1][x + 1] === undefined
+    ) {
+        // the next point is out of bounds, so stop here
+        return false;
+    } else {
+        // no movement available, leave to rest
+        map[y][x] = SAND;
+        // add new falling sand
+        map[0][500] = FALLING_SAND;
+    }
+
+    return true;
 }
