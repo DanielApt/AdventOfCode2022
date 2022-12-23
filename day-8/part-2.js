@@ -3,11 +3,7 @@ const fs = require("fs");
 const sampleInput = fs.readFileSync("./sample-input.txt", "utf8");
 const puzzleInput = fs.readFileSync("./input.txt", "utf8");
 
-// 9546 - answer too high
-// 9447 - answer too high
-
 console.log(main(sampleInput));
-
 console.log(main(puzzleInput));
 
 /**
@@ -18,7 +14,6 @@ function main(puzzleInput) {
     const grid = puzzleInput
         .split("\n")
         .map((row) => row.split("").map((str) => Number(str)));
-    let visibleTrees = 0;
 
     const visibleScores = [];
 
@@ -53,25 +48,12 @@ function main(puzzleInput) {
             ]
                 .filter((score) => score !== 0)
                 .reduce((a, b) => a * b);
+
             visibleScores.push(visibleScore);
-
-            // visibleScores.push(leftVisible * topVisible * rightVisible * bottomVisible);
-
-            //
-            // if (
-            //     tree > getBiggestItemFromArray(left) ||
-            //     tree > getBiggestItemFromArray(top) ||
-            //     tree > getBiggestItemFromArray(right) ||
-            //     tree > getBiggestItemFromArray(bottom)
-            // ) {
-            //     visibleTrees++;
-            // }
         }
     }
 
     return getBiggestItemFromArray(visibleScores);
-
-    return visibleTrees;
 }
 
 function getVisibleTrees(arr, current) {
