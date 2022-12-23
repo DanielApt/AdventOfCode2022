@@ -21,7 +21,7 @@ function main(puzzleInput) {
 
     let totalOverlap = 0;
 
-    ranges.forEach(range => {
+    ranges.forEach((range) => {
         const a = createSections(range[0]);
         const b = createSections(range[1]);
 

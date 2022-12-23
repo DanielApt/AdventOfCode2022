@@ -21,14 +21,14 @@ function main(puzzleInput) {
 
     let totalRanges = 0;
 
-    ranges.forEach(range => {
+    ranges.forEach((range) => {
         const a = range[0];
         const b = range[1];
 
-        if (a[0] <= b[0] && a[1] >= b[1] ) {
+        if (a[0] <= b[0] && a[1] >= b[1]) {
             totalRanges += 1;
         } else if (b[0] <= a[0] && b[1] >= a[1]) {
-            totalRanges +=1;
+            totalRanges += 1;
         }
     });
 

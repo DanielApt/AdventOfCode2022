@@ -1,7 +1,7 @@
-const fs = require('fs');
+const fs = require("fs");
 
-const sampleInput = fs.readFileSync('./sample-input.txt', 'utf8');
-const puzzleInput = fs.readFileSync('./input.txt', 'utf8');
+const sampleInput = fs.readFileSync("./sample-input.txt", "utf8");
+const puzzleInput = fs.readFileSync("./input.txt", "utf8");
 
 const CHARCODES = {
     a: 1,
@@ -29,7 +29,7 @@ const CHARCODES = {
     w: 23,
     x: 24,
     y: 25,
-    z: 26
+    z: 26,
 };
 
 console.log(main(sampleInput));
@@ -42,7 +42,7 @@ console.log(main(puzzleInput));
 function main(puzzleInput) {
     const groups = splitIntoGroups(puzzleInput);
     const badges = groups.map(findBadge);
-    const priorities = badges.map(getItemPriority)
+    const priorities = badges.map(getItemPriority);
 
     return priorities.reduce((a, b) => a + b);
 }
@@ -57,7 +57,7 @@ function splitIntoGroups(puzzleInput, size = 3) {
     let currentGroup = [];
     const groups = [];
 
-    const lines = puzzleInput.split('\n');
+    const lines = puzzleInput.split("\n");
 
     for (let i = 0; i < lines.length; i++) {
         currentGroup.push(lines[i]);
@@ -79,12 +79,11 @@ function splitIntoGroups(puzzleInput, size = 3) {
 
 function findBadge(group) {
     const allItems = group
-        .map(rucksack => [...new Set([...rucksack])]
-        .join(''))
+        .map((rucksack) => [...new Set([...rucksack])].join(""))
         .reduce((a, b) => `${a}${b}`);
 
     for (let i = 0; i < allItems.length; i++) {
-        const regex = new RegExp(allItems[i], 'g');
+        const regex = new RegExp(allItems[i], "g");
         const match = allItems.match(regex);
         if (match && match.length >= 3) {
             return allItems[i];
@@ -99,7 +98,7 @@ function findBadge(group) {
  */
 function getItemPriority(item) {
     if (CHARCODES[item]) {
-        return CHARCODES[item]
+        return CHARCODES[item];
     }
 
     // is uppercase

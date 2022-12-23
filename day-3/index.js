@@ -1,7 +1,7 @@
-const fs = require('fs');
+const fs = require("fs");
 
-const sampleInput = fs.readFileSync('./sample-input.txt', 'utf8');
-const puzzleInput = fs.readFileSync('./input.txt', 'utf8');
+const sampleInput = fs.readFileSync("./sample-input.txt", "utf8");
+const puzzleInput = fs.readFileSync("./input.txt", "utf8");
 
 const CHARCODES = {
     a: 1,
@@ -29,23 +29,22 @@ const CHARCODES = {
     w: 23,
     x: 24,
     y: 25,
-    z: 26
+    z: 26,
 };
 
 console.log(main(sampleInput));
 console.log(main(puzzleInput));
-
 
 /**
  * @param {String} puzzleInput
  * @return {Number} total priority
  */
 function main(puzzleInput) {
-    const rucksacks = puzzleInput.split('\n');
-    const commonItems = rucksacks.map(rucksack => {
-       const index = rucksack.length/2;
-       const left = rucksack.slice(0, index);
-       const right = rucksack.slice(index, rucksack.length);
+    const rucksacks = puzzleInput.split("\n");
+    const commonItems = rucksacks.map((rucksack) => {
+        const index = rucksack.length / 2;
+        const left = rucksack.slice(0, index);
+        const right = rucksack.slice(index, rucksack.length);
 
         for (let i = 0; i < left.length; i++) {
             if (right.indexOf(left[i]) !== -1) {
@@ -54,9 +53,9 @@ function main(puzzleInput) {
         }
     });
 
-    const itemPriorities = commonItems.map(item => {
+    const itemPriorities = commonItems.map((item) => {
         if (CHARCODES[item]) {
-            return CHARCODES[item]
+            return CHARCODES[item];
         }
 
         // is uppercase
