@@ -1,0 +1,7 @@
+# Follow .gitignore
+.idea
+.DS_Store
+
+# Ignore artifacts:
+build
+coverage
