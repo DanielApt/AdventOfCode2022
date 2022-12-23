@@ -2,8 +2,8 @@ const fs = require("fs");
 
 const sampleInput = [
     {
-        items: [79, 98],
-        operation: "old * 19",
+        items: [79n, 98n],
+        operation: "old * 19n",
         test: "divisible by 23",
         trueAction: "throw to monkey 2",
         falseAction: "throw to monkey 3",
@@ -11,8 +11,8 @@ const sampleInput = [
     },
 
     {
-        items: [54, 65, 75, 74],
-        operation: "old + 6",
+        items: [54n, 65n, 75n, 74n],
+        operation: "old + 6n",
         test: "divisible by 19",
         trueAction: "throw to monkey 2",
         falseAction: "throw to monkey 0",
@@ -20,7 +20,7 @@ const sampleInput = [
     },
 
     {
-        items: [79, 60, 97],
+        items: [79n, 60n, 97n],
         operation: "old * old",
         test: "divisible by 13",
         trueAction: "throw to monkey 1",
@@ -29,8 +29,8 @@ const sampleInput = [
     },
 
     {
-        items: [74],
-        operation: "old + 3",
+        items: [74n],
+        operation: "old + 3n",
         test: "divisible by 17",
         trueAction: "throw to monkey 0",
         falseAction: "throw to monkey 1",
@@ -105,10 +105,10 @@ const puzzleInput = [
         inspections: 0,
     },
 ];
-const ROUND_LIMIT = 20;
+const ROUND_LIMIT = 10000;
 
-// console.log(main(sampleInput));
-console.log(main(puzzleInput));
+console.log(main(sampleInput));
+// console.log(main(puzzleInput));
 
 /**
  * @param {[{test: string, trueAction: string, falseAction: string, items: number[], operation: string}, {test: string, trueAction: string, falseAction: string, items: number[], operation: string}, {test: string, trueAction: string, falseAction: string, items: number[], operation: string}, {test: string, trueAction: string, falseAction: string, items: number[], operation: string, inspections: number}]} puzzleInput
@@ -120,28 +120,26 @@ function main(puzzleInput) {
     let currentRound = 0;
     while (currentRound < ROUND_LIMIT) {
         currentRound++;
+        console.log(currentRound);
         //something per monkey
 
         monkeys.forEach((monkey, index) => {
-            console.log(`Monkey ${index}`);
+            // console.log(`Monkey ${index}`);
             monkey.items.forEach((item) => {
                 let old = item;
-                console.log(
-                    `  Monkey inspects an item with a worry level of ${item}`
-                );
+                // console.log(
+                //     `  Monkey inspects an item with a worry level of ${item}`
+                // );
                 monkey.operation = monkey.operation.replace(/old/g, "item");
 
                 item = eval(monkey.operation);
-                console.log(`  Worry level is ${monkey.operation} to ${item}`);
-                item = Math.floor(item / 3);
-                console.log(
-                    `  Monkey gets bored with item. Worry level is divided by 3 to ${item}`
-                );
 
-                const testOperation = monkey.test.replace("divisible by", "%");
+                const testOperation = monkey.test
+                    .replace("divisible by", "%")
+                    .replace(/$/, "n");
 
-                const action = eval(`${item}
-                ${testOperation} === 0`)
+                const action = eval(`item
+                ${testOperation} === 0n`)
                     ? monkey.trueAction
                     : monkey.falseAction;
 
@@ -152,15 +150,21 @@ function main(puzzleInput) {
                 // monkey.items.shift(); //we're down with this item
                 monkeys[newLocation].items.push(item);
 
-                console.log(
-                    `  Item with worry level ${item} is thrown to monkey ${newLocation}`
-                );
+                // console.log(
+                //     `  Item with worry level ${item} is thrown to monkey ${newLocation}`
+                // );
 
                 monkey.inspections++;
             });
             monkey.items = []; // processed all items
         });
     }
+
+    monkeys.forEach((monkey, index) => {
+        console.log(
+            `Monkey ${index} inspected items ${monkey.inspections} times`
+        );
+    });
 
     return monkeys
         .map((monkey) => monkey.inspections)
