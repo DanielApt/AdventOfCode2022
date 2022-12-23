@@ -10,7 +10,7 @@ const ROCK = "#";
 
 console.log(main(sampleInput));
 
-console.log(main(puzzleInput));
+console.log(main(puzzleInput)); // warning, this is very slow
 
 /**
  * @param {String} puzzleInput
@@ -98,10 +98,12 @@ function drawEmptyMap(puzzleInput) {
     const minX = xPositions[0];
     const maxX = xPositions[xPositions.length - 1];
 
-    for (let y = minY; y <= maxY; y++) {
+    const PADDING = 140;
+
+    for (let y = minY; y <= maxY + 2; y++) {
         map[y] = [];
-        for (let x = minX; x <= maxX; x++) {
-            map[y][x] = AIR;
+        for (let x = minX - PADDING; x <= maxX + PADDING; x++) {
+            map[y][x] = y === maxY + 2 ? ROCK : AIR;
         }
     }
 
@@ -141,6 +143,10 @@ function drawNextSandPosition(map) {
     } else {
         // no movement available, leave to rest
         map[y][x] = SAND;
+        if (y === 0 && x === 500) {
+            console.log("got here");
+            return false;
+        }
         // add new falling sand
         map[0][500] = FALLING_SAND;
     }
