@@ -19,8 +19,6 @@ function main(puzzleInput) {
         x: 1,
     };
 
-    const NEEDED_CYCLE_TIME = 2;
-
     let cycle = 1;
     let cycleTimeOnCommand = 0;
     let currentCommandIndex = 0;
@@ -48,37 +46,7 @@ function main(puzzleInput) {
                 currentCommandIndex++;
             }
         }
-
-        // get command
     }
-
-    // while (cycle <= CYCLES[CYCLES.length - 1]) {
-    //     console.log(registries.x);
-    //
-    //     if (instructions[currentCommandIndex].match(/noop/)) {
-    //         currentCommandIndex += 1;
-    //     } else if (
-    //         instructions[currentCommandIndex].match(/^add(\w) (-?\d+)$/)
-    //     ) {
-    //         const match =
-    //             instructions[currentCommandIndex].match(/^add(\w) (-?\d+)$/);
-    //
-    //         const register = match[1];
-    //         const amount = Number(match[2]);
-    //
-    //         // adding to x needs two cycles to progress
-    //         while (cycleTimeOnCommand < NEEDED_CYCLE_TIME - 1) {
-    //             cycleTimeOnCommand++;
-    //             tick();
-    //         }
-    //         cycleTimeOnCommand = 0;
-    //
-    //         currentCommandIndex++;
-    //         registries[register] += amount;
-    //     }
-    //
-    //     tick();
-    // }
 
     console.log(instructions[currentCommandIndex]);
     console.log(signalStrengths);
@@ -93,6 +61,4 @@ function main(puzzleInput) {
         cycle++;
         cycleTimeOnCommand++;
     }
-
-    function storeImportantCycleValues() {}
 }
