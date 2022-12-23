@@ -7,12 +7,15 @@ const CYCLES = [20, 60, 100, 140, 180, 220];
 
 // 16620 - too high
 
-console.log(main(sampleInput));
+const ROW = 40;
+const HEIGHT = 6;
+
+// console.log(main(sampleInput));
 console.log(main(puzzleInput));
 //r
 /**
  * @param {String} puzzleInput
- * @return {Number}
+ * @return {String}
  */
 function main(puzzleInput) {
     let x = 1;
@@ -21,13 +24,12 @@ function main(puzzleInput) {
     let cycle = 1;
     let cycleTimeOnCommand = 0;
     let currentCommandIndex = 0;
-    const signalStrengths = [];
 
     const instructions = puzzleInput.split("\n");
 
-    while (cycle <= CYCLES[CYCLES.length - 1]) {
+    while (cycle <= ROW * HEIGHT) {
         const command = instructions[currentCommandIndex];
-
+        draw();
         tick();
 
         if (command.includes("noop")) {
@@ -47,16 +49,22 @@ function main(puzzleInput) {
         }
     }
 
-    console.log(instructions[currentCommandIndex]);
-    console.log(signalStrengths);
+    return image;
 
-    return signalStrengths.reduce((a, b) => a + b, 0);
+    function draw() {
+        if (cycle % 40 === 1) {
+            image += "\n";
+        }
+
+        const pixelToInsert =
+            Math.abs(cycle - 1 - x - Math.floor(cycle / ROW) * ROW) <= 1
+                ? "#"
+                : ".";
+
+        image += pixelToInsert;
+    }
 
     function tick() {
-        console.log(`${cycle}: ${instructions[currentCommandIndex]}`);
-        if (CYCLES.includes(cycle)) {
-            signalStrengths.push(cycle * x);
-        }
         cycle++;
         cycleTimeOnCommand++;
     }
