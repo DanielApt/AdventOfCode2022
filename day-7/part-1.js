@@ -22,7 +22,7 @@ function main(puzzleInput) {
 
     for (let i = 0; i < commands.length; i++) {
         // process command
-        if (commands[i].indexOf("$ cd") !== -1) {
+        if (commands[i].match(/^\$ cd/g)) {
             const directory = commands[i].replace("$ cd ", "");
             if (directory === "/") {
                 currentDirectory = "";
@@ -33,9 +33,9 @@ function main(puzzleInput) {
             } else {
                 currentDirectory = `${currentDirectory}/${directory}`;
             }
-        } else if (commands[i].indexOf("$ ls") !== -1) {
+        } else if (commands[i].match(/^\$ ls/g)) {
             // listing = true;
-        } else if (commands[i].indexOf("dir") !== -1) {
+        } else if (commands[i].match(/^dir/g)) {
             // const directory = commands[i].replace('dir ');
             // // add directory to current directory
             // currentDirectory = {..., [directory]: {}}
@@ -68,19 +68,44 @@ function main(puzzleInput) {
 
     function getDirectorySize(directory) {
         let size = 0;
-        fileSystem
-            .filter((listing) => {
-                const regex = new RegExp(`^${directory}`, 'g')
-                return listing.file.match(regex);
-            })
-            .forEach((file) => {
-                size += file.size;
-            });
+
+        // simple way
+        const simpleWay = fileSystem.filter(file => file.file.includes(directory));
+
+        // regex way
+        const regexWay = fileSystem.filter((listing) => {
+            const regex = new RegExp(`^${directory}`, "g");
+            return listing.file.match(regex);
+        });
+
+        regexWay.forEach((file) => {
+            size += file.size;
+        });
 
         return size;
     }
 
     let answer = 0;
+
+    // let's test if all files are present
+    const numbers = puzzleInput
+        .split("\n")
+        .map((line) => line.match(/\d+/g))
+        .filter((l) => l !== null)
+        .map((s) => Number(s));
+
+    // console.log(numbers.length);
+    // console.log(fileSystem.length);
+
+    numbers.forEach((number) => {
+        const find = fileSystem.find((file) => file.size === number);
+
+        // if (!find) {
+        //     console.log('we lost a file!!!!');
+        // } else {
+        //     console.log('all files there');
+        // }
+    });
 
     // sum of below
     directoriesWithSize
@@ -88,6 +113,9 @@ function main(puzzleInput) {
         .forEach((dir) => {
             answer += dir.size;
         });
+
+    // console.log(fileSystem.map(file => file.size).reduce((a, b) => a + b));
+    // console.log(directoriesWithSize);
 
     return answer;
 }
