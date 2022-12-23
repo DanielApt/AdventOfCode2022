@@ -1,9 +1,10 @@
 const fs = require("fs");
 
 const sampleInput = fs.readFileSync("./sample-input.txt", "utf8");
+const interimInput = fs.readFileSync("./interim-input.txt", "utf8");
 const puzzleInput = fs.readFileSync("./input.txt", "utf8");
 
-console.log(main(sampleInput));
+// 2942: too high
 
 console.log(main(puzzleInput));
 
@@ -11,7 +12,7 @@ console.log(main(puzzleInput));
  * @param {String} puzzleInput
  * @return {Number}
  */
-function main(puzzleInput) {
+function main(puzzleInput, size = 10) {
     const moves = puzzleInput
         .split("\n")
         .map((line) => line.match(/^(\w) (\d+)$/))
@@ -20,10 +21,13 @@ function main(puzzleInput) {
 
     console.log(moves);
 
-    const tailPositions = [];
+    const knots = [];
 
-    const hPosition = [0, 0];
-    const tPosition = [0, 0];
+    for (let i = 0; i < size; i++) {
+        knots.push([0, 0]);
+    }
+
+    const tailPositions = [];
 
     moves.forEach(([direction, amount]) => {
         let xFactor = 0;
@@ -49,17 +53,19 @@ function main(puzzleInput) {
         console.log([direction, amount]);
 
         while (stepsTaken < amount) {
-            // take a step
-            hPosition[0] += xFactor;
-            hPosition[1] += yFactor;
-            console.log(hPosition);
-            stepsTaken++;
+            knots.forEach((knot, index) => {
+                if (index === 0) {
+                    knot[0] += xFactor;
+                    knot[1] += yFactor;
+                } else {
+                    const previousKnot = knots[index - 1];
 
-            // figure something out with tPosition
-            const [tailX, tailY] = getNewTailPosition(hPosition, tPosition);
-            tPosition[0] = tailX;
-            tPosition[1] = tailY;
-            tailPositions.push(tPosition.join(","));
+                    knots[index] = getNewPosition(previousKnot, knot);
+                }
+            });
+
+            stepsTaken++;
+            tailPositions.push(String(knots[knots.length - 1]));
         }
     });
 
@@ -78,14 +84,7 @@ function main(puzzleInput) {
  * @return {[Number, Number]}
  */
 
-/*
-If the head is ever two steps directly up, down, left, or right from the tail,
-the tail must also move one step in that direction so it remains close enough:
-
-Otherwise, if the head and tail aren't touching and aren't in the same row or column,
-the tail always moves one step diagonally to keep up:
- */
-function getNewTailPosition(h, t) {
+function getNewPosition(h, t) {
     const xDistance = Math.abs(h[0] - t[0]);
     const yDistance = Math.abs(h[1] - t[1]);
 
@@ -105,10 +104,9 @@ function getNewTailPosition(h, t) {
         return t;
     }
 
+    // move diagonally
     h[1] > t[1] ? t[1]++ : t[1]--;
     h[0] > t[0] ? t[0]++ : t[0]--;
-
-    // figure out how to move diagonally
 
     return t;
 }
