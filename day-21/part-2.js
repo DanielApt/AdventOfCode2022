@@ -15,31 +15,50 @@ class Monkey {
 
         const digitMatch = value.match(/\d+/g);
 
-        if (digitMatch) {
-            this.value = Number(digitMatch);
+        if (name === "humn") {
+            this.value = "x";
+        } else if (digitMatch) {
+            this.value = BigInt(digitMatch);
         } else {
             // this is an operator Monkey
             const monkeyMatch = value.match(/(\w+) ([+-\/\*]) (\w+)/);
 
             const a = new Monkey(monkeyMatch[1], monkeyStrings);
-            const operator = monkeyMatch[2];
+            const operator = name === "root" ? "=" : monkeyMatch[2];
             const b = new Monkey(monkeyMatch[3], monkeyStrings);
+
+            const isExpression =
+                `${a.value}`.includes("x") || `${b.value}`.includes("x");
+
+            // const isExpression = true;
 
             switch (operator) {
                 case "+":
-                    this.value = a.value + b.value;
+                    this.value = isExpression
+                        ? `(${a.value} + ${b.value})`
+                        : BigInt(a.value + b.value);
                     break;
 
                 case "-":
-                    this.value = a.value - b.value;
+                    this.value = isExpression
+                        ? `(${a.value} - ${b.value})`
+                        : BigInt(a.value - b.value);
                     break;
 
                 case "*":
-                    this.value = a.value * b.value;
+                    this.value = isExpression
+                        ? `(${a.value} * ${b.value})`
+                        : BigInt(a.value * b.value);
                     break;
 
                 case "/":
-                    this.value = a.value / b.value;
+                    this.value = isExpression
+                        ? `(${a.value} / ${b.value})`
+                        : BigInt(a.value / b.value);
+                    break;
+
+                case "=":
+                    this.value = `${a.value} = ${b.value}`;
                     break;
             }
         }
@@ -63,5 +82,6 @@ function main(puzzleInput) {
 
     const root = new Monkey("root", monkeyStrings);
 
+    console.log(`take the below expression and solve on https://quickmath.com`);
     return root.value;
 }

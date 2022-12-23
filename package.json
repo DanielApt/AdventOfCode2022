@@ -2,6 +2,7 @@
   "name": "advent-of-code-2022",
   "version": "1.0.0",
   "dependencies": {
+    "algebra.js": "^0.2.6",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
