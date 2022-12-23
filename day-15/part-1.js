@@ -6,6 +6,13 @@ const SENSOR = "S";
 const BEACON = "B";
 const UNAVAILABLE = "#";
 const AIR = ".";
+const PADDING = 100;
+
+// 3974215 - answer is too low
+// 3974214 - did not try as already too low
+// 4121145 - answer is too low
+// 7487721 - answer is too high
+// 7487720 - not the right answer
 
 console.log(main(sampleInput, 10));
 
@@ -13,88 +20,78 @@ console.log(main(puzzleInput, 2000000));
 
 /**
  * @param {String} puzzleInput
- * @param {Number} rowToScan
+ * @param {Number} yToScan
  * @return {Number}
  */
-function main(puzzleInput, rowToScan) {
-    const grid = createGrid(puzzleInput);
+function main(puzzleInput, yToScan) {
+    const line = createLine(puzzleInput);
+    // const line = [];
 
     // add sensors and beacons
-    puzzleInput.split("\n").forEach((line, index) => {
-        const numbers = line.match(/-?\d+/g).map((str) => Number(str));
-        const xSensor = numbers[0];
-        const ySensor = numbers[1];
-        const xBeacon = numbers[2];
-        const yBeacon = numbers[3];
+    const positions = puzzleInput.split("\n").map((row, index) => {
+        const numbers = row.match(/-?\d+/g).map((str) => Number(str));
+        const sensor = {
+            x: numbers[0],
+            y: numbers[1],
+        };
 
-        grid[ySensor][xSensor] = SENSOR;
-        grid[yBeacon][xBeacon] = BEACON;
+        const beacon = {
+            x: numbers[2],
+            y: numbers[3],
+        };
 
         // add unavailable areas
-        const distance = getManhattanDistance(
-            [xSensor, ySensor],
-            [xBeacon, yBeacon]
-        );
+        const distance = getManhattanDistance(sensor, beacon);
 
-        console.log(distance);
+        return {
+            sensor,
+            beacon,
+            distance,
+        };
+    });
 
-        for (let x = -1 * distance; x <= distance; x++) {
-            for (
-                let y = -1 * (distance - Math.abs(x));
-                y <= distance - Math.abs(x);
-                y++
-            ) {
-                if (!grid[y + ySensor]) {
-                    grid[y + ySensor] = [];
-                    // continue;
-                }
+    const validPositions = positions.filter(
+        (position) =>
+            // only take position which are within the sensor to beacon manhattan distance
+            getManhattanDistance(position.sensor, {
+                x: position.sensor.x,
+                y: yToScan,
+            }) <= position.distance
+    );
 
-                if (grid[y + ySensor][x + xSensor] === AIR) {
-                    grid[y + ySensor][x + xSensor] = UNAVAILABLE;
-                }
-            }
+    validPositions.forEach((position) => {
+        const yDistance = Math.abs(position.sensor.y - yToScan);
+        const xDistance = position.distance - yDistance;
+
+        for (
+            let i = position.sensor.x - xDistance;
+            i <= position.sensor.x + xDistance + 1;
+            i++
+        ) {
+            line[i] = UNAVAILABLE;
         }
     });
 
-    console.log(grid.map((row) => row.join("")).join("\n"));
-
-    return grid[rowToScan - 1].filter(
-        (point) => ![BEACON, SENSOR].includes(point)
-    ).length;
+    return line.filter((point) => point === UNAVAILABLE).length;
 }
 
-function createGrid(puzzleInput) {
-    console.log(`starting grid`);
-    const grid = [];
-
-    // yMax should be 23
+function createLine(puzzleInput) {
+    const line = [];
 
     const xCoordinates = puzzleInput
         .match(/x=(-?\d+)/g)
         .map((str) => Number(str.replace("x=", "")));
 
-    const yCoordinates = puzzleInput
-        .match(/y=(-?\d+)/g)
-        .map((str) => Number(str.replace("y=", "")));
+    const xMin = Math.min(...xCoordinates) - PADDING;
+    const xMax = Math.max(...xCoordinates) + PADDING;
 
-    const xMin = Math.min(...xCoordinates);
-    const xMax = Math.max(...xCoordinates);
-
-    const yMin = Math.min(...yCoordinates);
-    const yMax = Math.max(...yCoordinates);
-
-    console.log(`creating grid`);
-
-    for (let y = yMin; y <= yMax; y++) {
-        grid[y] = [];
-        for (let x = xMin; x <= xMax; x++) {
-            grid[y][x] = AIR;
-        }
+    for (let x = xMin; x <= xMax; x++) {
+        line[x] = AIR;
     }
 
-    return grid;
+    return line;
 }
 
 function getManhattanDistance(p1, p2) {
-    return Math.abs(p1[0] - p2[0]) + Math.abs(p1[1] - p2[1]);
+    return Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y);
 }
