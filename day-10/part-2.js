@@ -15,10 +15,9 @@ console.log(main(puzzleInput));
  * @return {Number}
  */
 function main(puzzleInput) {
-    const registries = {
-        x: 1,
-    };
+    let x = 1;
 
+    let image = "";
     let cycle = 1;
     let cycleTimeOnCommand = 0;
     let currentCommandIndex = 0;
@@ -41,7 +40,7 @@ function main(puzzleInput) {
                 // do nothing
             } else {
                 const amount = Number(command.replace("addx ", ""));
-                registries.x += amount;
+                x += amount;
                 cycleTimeOnCommand = 0;
                 currentCommandIndex++;
             }
@@ -56,7 +55,7 @@ function main(puzzleInput) {
     function tick() {
         console.log(`${cycle}: ${instructions[currentCommandIndex]}`);
         if (CYCLES.includes(cycle)) {
-            signalStrengths.push(cycle * registries.x);
+            signalStrengths.push(cycle * x);
         }
         cycle++;
         cycleTimeOnCommand++;
