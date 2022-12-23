@@ -4,6 +4,7 @@ const sampleInput = fs.readFileSync("./sample-input.txt", "utf8");
 const puzzleInput = fs.readFileSync("./input.txt", "utf8");
 
 // 9546 - answer too high
+// 9447 - answer too high
 
 console.log(main(sampleInput));
 console.log(main(puzzleInput));
