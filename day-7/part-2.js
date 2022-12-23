@@ -1,14 +1,9 @@
 const fs = require("fs");
 const _ = require("lodash");
 
-const LIMIT = 100000;
+const TOTAL_DISK = 70000000;
 
-// did not work: 1027500 - too low
-// did not work: 1077191
-// did not work: 1095702 - wrong answer
-// did not work: 1172628 - too high
-
-let dirTotal = 0;
+// did not work: 25773269 - too high
 
 const sampleInput = fs.readFileSync("./sample-input.txt", "utf8");
 const puzzleInput = fs.readFileSync("./input.txt", "utf8");
@@ -44,12 +39,6 @@ class Directory {
 
         return this.size;
     }
-
-    getDirectories() {
-        const dirs = this.contents.filter(item => item.constructor.name === 'Directory');
-        return [...dirs];
-        // return [...dirs, ...dirs.map(dir => dir.getDirectories())]
-    }
 }
 
 class File {
@@ -68,8 +57,8 @@ console.log(main(puzzleInput));
  * @return {Number}
  */
 function main(puzzleInput) {
+    let dirTotal = 0;
     let total = 0;
-    dirTotal = 0;
 
     const filesystem = new Directory();
     let currentDirectory = filesystem;
@@ -99,22 +88,28 @@ function main(puzzleInput) {
 
     filesystem.getSize();
 
-    const allDirectories = filesystem.getDirectories();
+    console.log(`Total: ${filesystem.size}`);
+    console.log(`Needed: ${TOTAL_DISK - filesystem.size}`)
 
-    console.log(filesystem);
+    const unusedSize = TOTAL_DISK - filesystem.size;
+    const neededSize = 30000000 - unusedSize;
+    const directorySizesToDelete = [];
 
     calculateDirectorySize(filesystem);
 
+    console.log(directorySizesToDelete.sort((a, b) => a - b)[0]);
+
     return dirTotal;
-}
 
+    function calculateDirectorySize (directory, total = 0) {
+        if (directory.size >= neededSize) {
+            directorySizesToDelete.push(directory.size);
+        }
 
-
-
-function calculateDirectorySize (directory, total = 0) {
-    if (directory.size <= LIMIT) {
-        dirTotal += directory.size;
+        directory.contents.filter(item => item.constructor.name === 'Directory').forEach(dir => calculateDirectorySize(dir))
     }
-
-    directory.contents.filter(item => item.constructor.name === 'Directory').forEach(dir => calculateDirectorySize(dir))
 }
+
+
+
+
