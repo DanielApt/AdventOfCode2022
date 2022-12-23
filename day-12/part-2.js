@@ -15,21 +15,26 @@ console.log(main(puzzleInput));
  * @return {Number}
  */
 function main(puzzleInput) {
+    // keeping the options array, although I never ended up needing it
+    const options = [puzzleInput.replace("S", "a")];
+
+    return options.map(getShortestPathFromMap).sort((a, b) => a - b)[0];
+}
+
+function getShortestPathFromMap(puzzleInput) {
     const grid = puzzleInput.split("\n").map((row, rowIndex) =>
         row.split("").map((str, columnIndex) => {
             const isStart = str === START;
             let value = str;
 
-            if (isStart) {
-                value = DEFAULT;
-            } else if (value === END) {
+            if (value === END) {
                 value = "z";
             }
 
             return {
                 value,
                 visited: false,
-                distance: isStart ? 0 : Infinity,
+                distance: value === "a" ? 0 : Infinity,
                 rowIndex,
                 columnIndex,
                 endNode: str === END,
@@ -37,16 +42,12 @@ function main(puzzleInput) {
         })
     );
 
-    let count = 0;
-
     let currentNode = grid
         .reduce((a, b) => [...a, ...b])
         .filter((node) => !node.visited)
         .sort((a, b) => a.distance - b.distance)[0];
 
     while (currentNode) {
-        count++;
-
         const neighbours = getNeighbours(currentNode, grid);
 
         neighbours.forEach((neighbour) => {
