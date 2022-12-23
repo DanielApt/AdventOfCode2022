@@ -36,13 +36,13 @@ console.log(main(sampleInput));
  * @return {Number}
  */
 function main(puzzleInput) {
+    const time = process.hrtime();
     let chamber = [new Array(CHAMBER_SIZE).fill("-")];
 
     const jets = puzzleInput.split("");
 
     let jetIndex = 0;
     let droppedRocks = 0;
-    let count = 0;
     let prevRocks;
     while (droppedRocks <= 2023) {
         if (prevRocks !== droppedRocks) {
@@ -69,11 +69,10 @@ function main(puzzleInput) {
         // then move down
         chamber = move("v", chamber);
         // console.log(chamber.map((row) => row.join("")).join("\n"));
-        count++;
-
-        // move to the next jet
     }
 
+    const diff = process.hrtime(time);
+    console.log(`Script took ${diff[0]} seconds`);
     return chamber.length;
 
     function addRockToChamber(rock, chamber) {
@@ -91,96 +90,55 @@ function main(puzzleInput) {
     function move(direction, chamber) {
         const newChamber = JSON.parse(JSON.stringify(chamber));
 
-        let xDirection = 0;
-        let yDirection = 0;
-        let xStart = 0;
-        let xEnd = CHAMBER_SIZE;
-
-        const yToStartScanningFrom = _.findLast(newChamber, (row) =>
-            row.includes("@")
-        );
+        const yStart = _.findLastIndex(newChamber, (row) => row.includes("@"));
+        const yEnd = _.findIndex(newChamber, (row) => row.includes("@"));
 
         if (direction === ">") {
-            xDirection = 1;
-            // we need to read in reverse
-            xStart = CHAMBER_SIZE;
-            xEnd = -1;
-        } else if (direction === "<") {
-            xDirection = -1;
-        } else {
-            // this is a down movement
-            yDirection = 1;
-        }
-
-        for (let y = newChamber.length - 1; y >= 0; y--) {
-            for (
-                let x = xStart;
-                x !== xEnd;
-                x -= xDirection === 0 ? -1 : xDirection
-            ) {
-                if (newChamber[y][x] === "@") {
-                    // try and move it in the direction
-                    if (newChamber[y + yDirection][x + xDirection] === ".") {
-                        newChamber[y + yDirection][x + xDirection] = "@";
-                        newChamber[y][x] = ".";
-                    } else {
-                        // cannot move, so we need to put the rock to rest
-
-                        if (yDirection === 0) {
+            for (let y = yStart; y >= yEnd; y--) {
+                for (let x = CHAMBER_SIZE; x >= 0; x--) {
+                    if (newChamber[y][x] === "@") {
+                        if (newChamber[y][x + 1] === ".") {
+                            newChamber[y][x + 1] = "@";
+                            newChamber[y][x] = ".";
+                        } else {
                             return chamber;
                         }
-
-                        droppedRocks++;
-
-                        return chamber.map((row) =>
-                            // replace all @ to #, indicating the rock has come to rest
-                            row.map((point) => point.replace("@", "#"))
-                        );
+                    }
+                }
+            }
+        } else if (direction === "<") {
+            for (let y = yStart; y >= yEnd; y--) {
+                for (let x = 0; x < CHAMBER_SIZE; x++) {
+                    if (newChamber[y][x] === "@") {
+                        if (newChamber[y][x - 1] === ".") {
+                            newChamber[y][x - 1] = "@";
+                            newChamber[y][x] = ".";
+                        } else {
+                            return chamber;
+                        }
+                    }
+                }
+            }
+        } else {
+            // this is a down movement
+            for (let y = yStart; y >= yEnd; y--) {
+                for (let x = 0; x < CHAMBER_SIZE; x++) {
+                    if (newChamber[y][x] === "@") {
+                        if (newChamber[y + 1][x] === ".") {
+                            newChamber[y + 1][x] = "@";
+                            newChamber[y][x] = ".";
+                        } else {
+                            // don't move down, but come to rest
+                            droppedRocks++;
+                            return chamber.map((row) =>
+                                row.map((point) => point.replace("@", "#"))
+                            );
+                        }
                     }
                 }
             }
         }
 
         return newChamber;
-
-        // const newChamber = chamber;
-        // let canMove = true;
-        // let xFactor = 0;
-        // let xStart = 0;
-        // let xEnd = 0;
-        //
-        // if (direction === ">") {
-        //     xFactor = 1;
-        //     xStart = 0;
-        //     xEnd = CHAMBER_SIZE;
-        // } else if (direction === "<") {
-        //     xFactor = -1;
-        //     xStart = CHAMBER_SIZE;
-        //     xEnd = 0;
-        // }
-        //
-        // newChamber
-        //     .filter((row) => row.includes("@"))
-        //     .forEach((row, index) => {
-        //         let x = xStart;
-        //
-        //         while (x !== xEnd) {
-        //             x += xFactor;
-        //         }
-        //
-        //         for (let x = 0; x < row.length; x++) {
-        //             const nextPoint = row[x + xFactor];
-        //
-        //             if (nextPoint === ".") {
-        //                 row[x + xFactor] = "@";
-        //                 row[x] = ".";
-        //             } else {
-        //                 // cannot move, break the loop
-        //                 break;
-        //             }
-        //         }
-        //     });
-        //
-        // return canMove ? newChamber : chamber;
     }
 }
