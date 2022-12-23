@@ -11,45 +11,46 @@ console.log(main(puzzleInput));
  * @return {Number}
  */
 function main(puzzleInput) {
-    const pairs = puzzleInput
-        .split("\n\n")
-        .map((str) => str.split("\n"))
-        .map((pair) => ({
-            left: eval(pair[0]),
-            right: eval(pair[1]),
-        }));
+    const packets = puzzleInput
+        .replace(/\n\n/g, "\n")
+        .split("\n")
+        .map((p) => eval(p));
 
-    const validPairIndices = [];
+    packets.push([[2]]);
+    packets.push([[6]]);
 
-    for (let i = 0; i < pairs.length; i++) {}
+    const sorted = packets
+        .sort((b, a) => compareIfListInRightOrder(a, b))
+        .reverse();
 
-    pairs.forEach((pair, index) => {
-        const { left, right } = pair;
+    const dividerIndexes = [];
 
-        if (compareIfListInRightOrder(left, right)) {
-            validPairIndices.push(index + 1);
+    sorted.forEach((packet, index) => {
+        const packetString = JSON.stringify(packet);
+        if (packetString === "[[2]]" || packetString === "[[6]]") {
+            dividerIndexes.push(index + 1);
         }
     });
 
-    return validPairIndices.reduce((a, b) => a + b);
+    return dividerIndexes.reduce((a, b) => a * b);
 }
 
 function compareIfListInRightOrder(left, right) {
     // for integers
     if (typeof left === "number" && typeof right === "number") {
         if (left < right) {
-            return true;
+            return -1;
         } else if (left > right) {
-            return false;
+            return 1;
         } else {
             return undefined;
         }
         // one of the types is an object, make sure to wrap the right number
     } else if (left === undefined) {
         // left is shorter than right, which is good
-        return true;
+        return -1;
     } else if (right === undefined) {
-        return false;
+        return 1;
     } else if (typeof left === "number") {
         return compareIfListInRightOrder([left], right);
     } else if (typeof right === "number") {
