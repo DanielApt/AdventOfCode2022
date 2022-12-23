@@ -3,12 +3,13 @@ const _ = require("lodash");
 
 const LIMIT = 100000;
 
+// did not work: 1027500 - too low
+
 const sampleInput = fs.readFileSync("./sample-input.txt", "utf8");
-// const puzzleInput = fs.readFileSync("./input.txt", "utf8");
+const puzzleInput = fs.readFileSync("./input.txt", "utf8");
 
 console.log(main(sampleInput));
-
-// console.log(main(puzzleInput));
+console.log(main(puzzleInput));
 
 /**
  * @param {String} puzzleInput
@@ -50,13 +51,12 @@ function main(puzzleInput) {
     const directories = _.uniq(
         fileSystem
             .map((listing) => {
-                const match = listing.file.match(/\/(\w\/)+/g);
+                const match = listing.file.match(/^\/(\w+\/)+/g);
                 if (!match) {
                     return null;
                 }
 
                 return match[0];
-                // listing.file.match(/\/(\w\/)+/g);
             })
             .filter((dir) => dir !== null)
     );
@@ -69,7 +69,10 @@ function main(puzzleInput) {
     function getDirectorySize(directory) {
         let size = 0;
         fileSystem
-            .filter((listing) => listing.file.includes(directory))
+            .filter((listing) => {
+                const regex = new RegExp(`^${directory}`, 'g')
+                return listing.file.match(regex);
+            })
             .forEach((file) => {
                 size += file.size;
             });
@@ -77,8 +80,14 @@ function main(puzzleInput) {
         return size;
     }
 
+    let answer = 0;
+
     // sum of below
-    return Number(directoriesWithSize
+    directoriesWithSize
         .filter((dir) => dir.size <= LIMIT)
-        .reduce((a, b) => a.size + b.size));
+        .forEach((dir) => {
+            answer += dir.size;
+        });
+
+    return answer;
 }
