@@ -1,5 +1,7 @@
 const fs = require("fs");
 
+const DECRYPTION_KEY = 811589153;
+
 const sampleInput = fs.readFileSync("./sample-input.txt", "utf8");
 const puzzleInput = fs.readFileSync("./input.txt", "utf8");
 
@@ -11,39 +13,53 @@ console.log(main(puzzleInput));
  * @return {Number}
  */
 function main(puzzleInput) {
+    const start = process.hrtime();
+
     const initialArrangement = puzzleInput.split("\n").map((str, index) => ({
         id: index,
-        value: Number(str),
+        value: Number(str) * DECRYPTION_KEY,
     }));
 
     let arrangement = [...initialArrangement];
 
-    initialArrangement.forEach((item) => {
-        const index = arrangement.indexOf(item);
-        const movement = item.value;
+    let count = 0;
 
-        // remove the item being moved
-        const oldItem = arrangement.splice(index, 1)[0];
+    while (count < 10) {
+        mix();
+        count++;
+    }
 
-        // add it to the place we are interested in
-        let newIndex = index + movement;
-        while (newIndex <= 0) {
-            newIndex += arrangement.length;
-        }
+    function mix() {
+        initialArrangement.forEach((item) => {
+            const index = arrangement.findIndex((n) => n.id === item.id);
+            const movement = item.value;
 
-        while (newIndex > arrangement.length) {
-            newIndex -= arrangement.length;
-        }
+            // remove the item being moved
+            const oldItem = arrangement.splice(index, 1)[0];
 
-        arrangement.splice(newIndex, 0, oldItem);
+            // add it to the place we are interested in
+            let newIndex = index + movement;
 
-        // console.log(arrangement.map((n) => n.value).join(", "));
-    });
+            if (newIndex <= 0) {
+                newIndex +=
+                    Math.ceil(-newIndex / arrangement.length) *
+                    arrangement.length;
+                newIndex += arrangement.length;
+            }
+
+            if (newIndex > arrangement.length) {
+                newIndex = newIndex % arrangement.length;
+            }
+
+            arrangement.splice(newIndex, 0, oldItem);
+        });
+    }
 
     const zeroIndex = arrangement.findIndex((n) => n.value === 0);
     const a = arrangement[(zeroIndex + 1000) % arrangement.length].value;
     const b = arrangement[(zeroIndex + 2000) % arrangement.length].value;
     const c = arrangement[(zeroIndex + 3000) % arrangement.length].value;
 
+    console.log(`${process.hrtime(start)[0]} seconds`);
     return a + b + c;
 }
