@@ -6,27 +6,30 @@ const puzzleInput = fs.readFileSync('./input.txt', 'utf8');
 const CHOICE_POINTS = {
     A: 1,
     B: 2,
-    C: 3,
-    X: 1,
-    Y: 2,
-    Z: 3
+    C: 3
 }
 
-const OUTCOMES = {
+const OUTCOME_SCORE = {
+    X: 0,
+    Y: 3,
+    Z: 6
+}
+
+const YOUR_MOVE = {
     A: {
-        X: 3,
-        Y: 6,
-        Z: 0
+        X: 'C',
+        Y: 'A',
+        Z: 'B'
     },
     B: {
-        X: 0,
-        Y: 3,
-        Z: 6
+        X: 'A',
+        Y: 'B',
+        Z: 'C'
     },
     C: {
-        X: 6,
-        Y: 0,
-        Z: 3
+        X: 'B',
+        Y: 'C',
+        Z: 'A'
     }
 }
 
@@ -42,13 +45,11 @@ function main(puzzleInput) {
     let score = 0;
 
     games.forEach(game => {
-        const [opponentMove, yourMove] = game;
+        const [opponentMove, outcome] = game;
 
-        console.log(`Adding ${CHOICE_POINTS[yourMove]} for choice`)
+        const yourMove = YOUR_MOVE[opponentMove][outcome];
         score += CHOICE_POINTS[yourMove];
-
-        console.log(`Adding ${OUTCOMES[opponentMove][yourMove]} for game`)
-        score += OUTCOMES[opponentMove][yourMove];
+        score += OUTCOME_SCORE[outcome];
     });
 
     return score;
