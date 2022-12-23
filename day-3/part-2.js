@@ -48,7 +48,7 @@ function main(puzzleInput) {
 }
 
 /**
- * Splits file into groups of 3
+ * Splits file into groups of `size`
  * @param {String} puzzleInput
  * @param {Number} size (default: 3)
  * @return {Array<Array<String>>} Groups of three
