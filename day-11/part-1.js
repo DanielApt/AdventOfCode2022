@@ -38,11 +38,77 @@ const sampleInput = [
     },
 ];
 
-const puzzleInput = fs.readFileSync("./input.txt", "utf8");
-
+// const puzzleInput = fs.readFileSync("./input.txt", "utf8");
+const puzzleInput = [
+    {
+        items: [54, 98, 50, 94, 69, 62, 53, 85],
+        operation: "old * 13",
+        test: "divisible by 3",
+        trueAction: "throw to monkey 2",
+        falseAction: "throw to monkey 1",
+        inspections: 0,
+    },
+    {
+        items: [71, 55, 82],
+        operation: "old + 2",
+        test: "divisible by 13",
+        trueAction: "throw to monkey 7",
+        falseAction: "throw to monkey 2",
+        inspections: 0,
+    },
+    {
+        items: [77, 73, 86, 72, 87],
+        operation: "old + 8",
+        test: "divisible by 19",
+        trueAction: "throw to monkey 4",
+        falseAction: "throw to monkey 7",
+        inspections: 0,
+    },
+    {
+        items: [97, 91],
+        operation: "old + 1",
+        test: "divisible by 17",
+        trueAction: "throw to monkey 6",
+        falseAction: "throw to monkey 5",
+        inspections: 0,
+    },
+    {
+        items: [78, 97, 51, 85, 66, 63, 62],
+        operation: "old * 17",
+        test: "divisible by 5",
+        trueAction: "throw to monkey 6",
+        falseAction: "throw to monkey 3",
+        inspections: 0,
+    },
+    {
+        items: [88],
+        operation: "old + 3",
+        test: "divisible by 7",
+        trueAction: "throw to monkey 1",
+        falseAction: "throw to monkey 0",
+        inspections: 0,
+    },
+    {
+        items: [87, 57, 63, 86, 87, 53],
+        operation: "old * old",
+        test: "divisible by 11",
+        trueAction: "throw to monkey 5",
+        falseAction: "throw to monkey 0",
+        inspections: 0,
+    },
+    {
+        items: [73, 59, 82, 65],
+        operation: "old + 6",
+        test: "divisible by 2",
+        trueAction: "throw to monkey 4",
+        falseAction: "throw to monkey 3",
+        inspections: 0,
+    },
+];
 const ROUND_LIMIT = 20;
 
-console.log(main(sampleInput));
+// console.log(main(sampleInput));
+console.log(main(puzzleInput));
 
 /**
  * @param {[{test: string, trueAction: string, falseAction: string, items: number[], operation: string}, {test: string, trueAction: string, falseAction: string, items: number[], operation: string}, {test: string, trueAction: string, falseAction: string, items: number[], operation: string}, {test: string, trueAction: string, falseAction: string, items: number[], operation: string, inspections: number}]} puzzleInput
@@ -74,7 +140,8 @@ function main(puzzleInput) {
 
                 const testOperation = monkey.test.replace("divisible by", "%");
 
-                const action = eval(`${item} ${testOperation} === 0`)
+                const action = eval(`${item}
+                ${testOperation} === 0`)
                     ? monkey.trueAction
                     : monkey.falseAction;
 
