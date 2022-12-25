@@ -4,6 +4,25 @@ const _ = require("lodash");
 const sampleInput = fs.readFileSync("./sample-input.txt", "utf8");
 const puzzleInput = fs.readFileSync("./input.txt", "utf8");
 
+const MOVEMENTS = {
+    north: {
+        dy: -1,
+        dx: 0,
+    },
+    east: {
+        dy: 0,
+        dx: 1,
+    },
+    south: {
+        dy: 1,
+        dx: 0,
+    },
+    west: {
+        dy: 0,
+        dx: -1,
+    },
+};
+
 // 60372 is not right
 // 60373 is not right
 // 60374 is too high
@@ -29,7 +48,7 @@ function main(puzzleInput) {
 
     let y = 0;
     let x = map[y].indexOf(".");
-    let degrees = 90;
+    let direction = "east";
 
     map[y][x] = "@";
 
@@ -52,32 +71,49 @@ function main(puzzleInput) {
         step(movement);
 
         // do something about the rotation
-        degrees += rotation === "R" ? 90 : -90;
+        if (rotation === "R") {
+            switch (direction) {
+                case "east":
+                    direction = "south";
+                    break;
+                case "south":
+                    direction = "west";
+                    break;
+
+                case "west":
+                    direction = "north";
+                    break;
+
+                case "north":
+                    direction = "east";
+            }
+        } else if (rotation === "L") {
+            switch (direction) {
+                case "east":
+                    direction = "north";
+                    break;
+                case "south":
+                    direction = "east";
+                    break;
+
+                case "west":
+                    direction = "south";
+                    break;
+
+                case "north":
+                    direction = "west";
+            }
+        }
     });
 
     const row = map.findIndex((row) => row.includes("@")) + 1;
     const column = map[row - 1].indexOf("@") + 1;
-    let facing = 0;
 
-    switch (degrees % 360) {
-        case 90:
-            facing = 0;
-            break;
-
-        case 180:
-            facing = 1;
-            break;
-
-        case 270:
-            facing = 2;
-            break;
-
-        case 0:
-            facing = 3;
-            break;
-    }
-
-    return 1000 * row + 4 * column + facing;
+    return (
+        1000 * row +
+        4 * column +
+        ["east", "south", "west", "north"].indexOf(direction)
+    );
 
     function step(movement, stepsTaken = 0) {
         y = map.findIndex((row) => row.includes("@"));
@@ -87,11 +123,10 @@ function main(puzzleInput) {
             return;
         }
 
-        let xMovement = Math.round(Math.sin((degrees * Math.PI) / 180));
-        let yMovement = Math.round(-Math.cos((degrees * Math.PI) / 180));
+        let { dx, dy } = MOVEMENTS[direction];
 
-        let newX = x + xMovement;
-        let newY = y + yMovement;
+        let newX = x + dx;
+        let newY = y + dy;
 
         if (newY === -1) {
             newY = map.length - 1;
@@ -100,17 +135,17 @@ function main(puzzleInput) {
         }
 
         if (map[newY][newX] === undefined || map[newY][newX] === " ") {
-            if (xMovement === 1) {
+            if (dx === 1) {
                 newX = map[newY].findIndex((point) =>
                     [".", "#"].includes(point)
                 );
-            } else if (xMovement === -1) {
+            } else if (dx === -1) {
                 newX = _.findLastIndex(map[newY], (point) =>
                     [".", "#"].includes(point)
                 );
-            } else if (yMovement === 1) {
+            } else if (dy === 1) {
                 newY = map.findIndex((row) => [".", "#"].includes(row[newX]));
-            } else if (yMovement === -1) {
+            } else if (dy === -1) {
                 newY = _.findLastIndex(map, (row) =>
                     [".", "#"].includes(row[x])
                 );
@@ -127,21 +162,5 @@ function main(puzzleInput) {
         } else {
             console.error("edge case");
         }
-    }
-}
-
-function getDirection(degrees) {
-    switch (degrees % 360) {
-        case 0:
-            return "^";
-
-        case 90:
-            return ">";
-
-        case 180:
-            return "v";
-
-        case 270:
-            return "<";
     }
 }
