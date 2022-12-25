@@ -98,8 +98,8 @@ function main(puzzleInput) {
         }
     });
 
-    const row = map.findIndex((row) => row.includes("@")) + 1;
-    const column = map[row - 1].indexOf("@") + 1;
+    const row = y + 1;
+    const column = x + 1;
 
     return (
         1000 * row + 4 * column + [EAST, SOUTH, WEST, NORTH].indexOf(direction)
@@ -148,8 +148,6 @@ function main(puzzleInput) {
         } else if (next === "#") {
             // it is a wall
             // do nothing
-        } else {
-            console.log("edge case");
         }
     }
 }
