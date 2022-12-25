@@ -4,6 +4,9 @@ const _ = require("lodash");
 const sampleInput = fs.readFileSync("./sample-input.txt", "utf8");
 const puzzleInput = fs.readFileSync("./input.txt", "utf8");
 
+// 60372 is not right
+// 60373 is not right
+// 60374 is too high
 // 60375 is too high
 
 let start = process.hrtime();
@@ -30,14 +33,20 @@ function main(puzzleInput) {
 
     map[y][x] = "@";
 
-    instructions.forEach((instruction, index) => {
+    instructions.forEach((instruction) => {
         const match = instruction.split(/(\d+)([A-Z])/);
         const movement = Number(match[1]);
         const rotation = match[2];
 
-        if (index === 73) {
-            console.log("start paying attention");
-        }
+        // console.clear();
+
+        // console.log(`Moving ${movement} in ${getDirection(degrees)}`);
+        // console.log(
+        //     map
+        //         .slice(0, 50)
+        //         .map((row) => row.join(""))
+        //         .join("\n")
+        // );
 
         // move until we hit a wall or reach our end-point
         step(movement);
@@ -71,59 +80,68 @@ function main(puzzleInput) {
     return 1000 * row + 4 * column + facing;
 
     function step(movement, stepsTaken = 0) {
-        // console.clear();
-        //
-        // console.log(map.map((row) => row.join("")).join("\n"));
+        y = map.findIndex((row) => row.includes("@"));
+        x = map[y].findIndex((point) => point === "@");
 
-        if (movement === stepsTaken) {
+        if (stepsTaken === movement) {
             return;
         }
 
         let xMovement = Math.round(Math.sin((degrees * Math.PI) / 180));
         let yMovement = Math.round(-Math.cos((degrees * Math.PI) / 180));
 
-        let next;
+        let newX = x + xMovement;
+        let newY = y + yMovement;
 
-        if (map[y + yMovement] === undefined) {
-            next = undefined;
-        } else {
-            next = map[y + yMovement][x + xMovement];
+        if (newY === -1) {
+            newY = map.length - 1;
+        } else if (newY === map.length) {
+            newY = 0;
         }
 
-        if (next === undefined || next === " ") {
-            let newX;
-            let newY;
+        if (map[newY][newX] === undefined || map[newY][newX] === " ") {
             if (xMovement === 1) {
-                newX = map[y].findIndex((point) => [".", "#"].includes(point));
-            } else if (xMovement === -1) {
-                newX = _.findLastIndex(map[y], (point) =>
+                newX = map[newY].findIndex((point) =>
                     [".", "#"].includes(point)
                 );
-            }
-
-            if (yMovement === 1) {
-                newY = map.findIndex((row) => [".", "#"].includes(row[x]));
+            } else if (xMovement === -1) {
+                newX = _.findLastIndex(map[newY], (point) =>
+                    [".", "#"].includes(point)
+                );
+            } else if (yMovement === 1) {
+                newY = map.findIndex((row) => [".", "#"].includes(row[newX]));
             } else if (yMovement === -1) {
                 newY = _.findLastIndex(map, (row) =>
                     [".", "#"].includes(row[x])
                 );
             }
-
-            xMovement = xMovement === 0 ? 0 : newX - x;
-            yMovement = yMovement === 0 ? 0 : newY - y;
-            next = map[y + yMovement][x + xMovement];
         }
 
-        if (next === ".") {
+        if (map[newY][newX] === ".") {
             map[y][x] = ".";
-            x += xMovement;
-            y += yMovement;
-            map[y][x] = "@";
+            map[newY][newX] = "@";
             step(movement, stepsTaken + 1);
-        } else if (next === "#") {
-            // stop here
-            stepsTaken = movement;
-            step(movement, stepsTaken);
+        } else if (map[newY][newX] === "#") {
+            // we've reached a wall
+            return;
+        } else {
+            console.error("edge case");
         }
+    }
+}
+
+function getDirection(degrees) {
+    switch (degrees % 360) {
+        case 0:
+            return "^";
+
+        case 90:
+            return ">";
+
+        case 180:
+            return "v";
+
+        case 270:
+            return "<";
     }
 }
