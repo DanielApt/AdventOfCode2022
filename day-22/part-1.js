@@ -4,20 +4,22 @@ const _ = require("lodash");
 const sampleInput = fs.readFileSync("./sample-input.txt", "utf8");
 const puzzleInput = fs.readFileSync("./input.txt", "utf8");
 
+const [NORTH, EAST, SOUTH, WEST] = ["north", "east", "south", "west"];
+
 const MOVEMENTS = {
-    north: {
+    [NORTH]: {
         dy: -1,
         dx: 0,
     },
-    east: {
+    [EAST]: {
         dy: 0,
         dx: 1,
     },
-    south: {
+    [SOUTH]: {
         dy: 1,
         dx: 0,
     },
-    west: {
+    [WEST]: {
         dy: 0,
         dx: -1,
     },
@@ -46,9 +48,9 @@ function main(puzzleInput) {
 
     const map = mapInput.split("\n").map((row) => row.split(""));
 
-    let y = 0;
+    let y = map.findIndex((r) => r.includes("."));
     let x = map[y].indexOf(".");
-    let direction = "east";
+    let direction = EAST;
 
     map[y][x] = "@";
 
@@ -57,51 +59,41 @@ function main(puzzleInput) {
         const movement = Number(match[1]);
         const rotation = match[2];
 
-        // console.clear();
-
-        // console.log(`Moving ${movement} in ${getDirection(degrees)}`);
-        // console.log(
-        //     map
-        //         .slice(0, 50)
-        //         .map((row) => row.join(""))
-        //         .join("\n")
-        // );
-
         // move until we hit a wall or reach our end-point
         step(movement);
 
         // do something about the rotation
         if (rotation === "R") {
             switch (direction) {
-                case "east":
-                    direction = "south";
+                case EAST:
+                    direction = SOUTH;
                     break;
-                case "south":
-                    direction = "west";
-                    break;
-
-                case "west":
-                    direction = "north";
+                case SOUTH:
+                    direction = WEST;
                     break;
 
-                case "north":
-                    direction = "east";
+                case WEST:
+                    direction = NORTH;
+                    break;
+
+                case NORTH:
+                    direction = EAST;
             }
         } else if (rotation === "L") {
             switch (direction) {
-                case "east":
-                    direction = "north";
+                case EAST:
+                    direction = NORTH;
                     break;
-                case "south":
-                    direction = "east";
-                    break;
-
-                case "west":
-                    direction = "south";
+                case NORTH:
+                    direction = WEST;
                     break;
 
-                case "north":
-                    direction = "west";
+                case WEST:
+                    direction = SOUTH;
+                    break;
+
+                case SOUTH:
+                    direction = EAST;
             }
         }
     });
@@ -110,57 +102,54 @@ function main(puzzleInput) {
     const column = map[row - 1].indexOf("@") + 1;
 
     return (
-        1000 * row +
-        4 * column +
-        ["east", "south", "west", "north"].indexOf(direction)
+        1000 * row + 4 * column + [EAST, SOUTH, WEST, NORTH].indexOf(direction)
     );
 
     function step(movement, stepsTaken = 0) {
-        y = map.findIndex((row) => row.includes("@"));
-        x = map[y].findIndex((point) => point === "@");
+        // console.clear();
+        //
+        // console.log(
+        //     map
+        //         .slice(0, 50)
+        //         .map((row) => row.join(""))
+        //         .join("\n")
+        // );
 
         if (stepsTaken === movement) {
             return;
         }
+
+        y = map.findIndex((row) => row.includes("@"));
+        x = map[y].findIndex((point) => point === "@");
 
         let { dx, dy } = MOVEMENTS[direction];
 
         let newX = x + dx;
         let newY = y + dy;
 
-        if (newY === -1) {
-            newY = map.length - 1;
-        } else if (newY === map.length) {
-            newY = 0;
-        }
-
-        if (map[newY][newX] === undefined || map[newY][newX] === " ") {
-            if (dx === 1) {
-                newX = map[newY].findIndex((point) =>
-                    [".", "#"].includes(point)
-                );
-            } else if (dx === -1) {
-                newX = _.findLastIndex(map[newY], (point) =>
-                    [".", "#"].includes(point)
-                );
-            } else if (dy === 1) {
-                newY = map.findIndex((row) => [".", "#"].includes(row[newX]));
-            } else if (dy === -1) {
-                newY = _.findLastIndex(map, (row) =>
-                    [".", "#"].includes(row[x])
-                );
+        if (!map[newY] || !map[newY][newX] || map[newY][newX] === " ") {
+            // keep moving in reverse, until we hit a tile again
+            while (
+                map[newY - dy] &&
+                map[newY - dy][newX - dx] &&
+                map[newY - dy][newX - dx] !== " "
+            ) {
+                newX -= dx;
+                newY -= dy;
             }
         }
 
-        if (map[newY][newX] === ".") {
+        let next = map[newY][newX];
+
+        if (next === ".") {
             map[y][x] = ".";
             map[newY][newX] = "@";
             step(movement, stepsTaken + 1);
-        } else if (map[newY][newX] === "#") {
-            // we've reached a wall
-            return;
+        } else if (next === "#") {
+            // it is a wall
+            // do nothing
         } else {
-            console.error("edge case");
+            console.log("edge case");
         }
     }
 }
