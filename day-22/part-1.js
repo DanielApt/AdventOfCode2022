@@ -48,12 +48,14 @@ function main(puzzleInput) {
 
     const map = mapInput.split("\n").map((row) => row.split(""));
 
+    // get the player in the right spot
     let y = map.findIndex((r) => r.includes("."));
     let x = map[y].indexOf(".");
     let direction = EAST;
 
     map[y][x] = "@";
 
+    // parse every instruction
     instructions.forEach((instruction) => {
         const match = instruction.split(/(\d+)([A-Z])/);
         const movement = Number(match[1]);
@@ -62,7 +64,7 @@ function main(puzzleInput) {
         // move until we hit a wall or reach our end-point
         step(movement);
 
-        // do something about the rotation
+        // rotate
         if (rotation === "R") {
             switch (direction) {
                 case EAST:
@@ -98,6 +100,7 @@ function main(puzzleInput) {
         }
     });
 
+    // calculate the final answer
     const row = y + 1;
     const column = x + 1;
 
@@ -115,20 +118,24 @@ function main(puzzleInput) {
         //         .join("\n")
         // );
 
+        // we’ve taken enough steps, so stop here
         if (stepsTaken === movement) {
             return;
         }
 
+        // get the y and x of the player
         y = map.findIndex((row) => row.includes("@"));
         x = map[y].findIndex((point) => point === "@");
 
+        // move to a new tile
         let { dx, dy } = MOVEMENTS[direction];
 
         let newX = x + dx;
         let newY = y + dy;
 
+        // check if the next tile exists
         if (!map[newY] || !map[newY][newX] || map[newY][newX] === " ") {
-            // keep moving in reverse, until we hit a tile again
+            // no tile found, keep moving in reverse till we run out of tiles
             while (
                 map[newY - dy] &&
                 map[newY - dy][newX - dx] &&
@@ -139,6 +146,7 @@ function main(puzzleInput) {
             }
         }
 
+        // this is our next tile
         let next = map[newY][newX];
 
         if (next === ".") {
