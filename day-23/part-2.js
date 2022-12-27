@@ -70,16 +70,32 @@ function main(puzzleInput) {
 
     console.log(elves);
 
+    let previousRound = "";
+    let currentRound = "";
     let totalRounds = 0;
 
-    while (totalRounds < 10) {
+    // first round
+    previousRound = JSON.stringify(elves);
+    let sameOutput = false;
+
+    // keep running rounds, until the current round output is the same as the previous round
+    while (!sameOutput) {
         round();
+        currentRound = JSON.stringify(elves);
+
+        if (previousRound === currentRound) {
+            sameOutput = true;
+        } else {
+            previousRound = currentRound;
+        }
 
         totalRounds++;
 
         // move the first check to the back
         checks.push(checks.shift());
     }
+
+    return totalRounds;
 
     function round() {
         // create proposal for each
@@ -174,25 +190,6 @@ function main(puzzleInput) {
             return [x + 1, y];
         }
     }
-
-    const xList = elves.map((elf) => elf.x);
-    const yList = elves.map((elf) => elf.y);
-    const xMin = Math.min(...xList);
-    const xMax = Math.max(...xList);
-    const yMin = Math.min(...yList);
-    const yMax = Math.max(...yList);
-
-    let emptySpaceCount = 0;
-
-    for (let x = xMin; x <= xMax; x++) {
-        for (let y = yMin; y <= yMax; y++) {
-            if (!elves.find((elf) => elf.x === x && elf.y === y)) {
-                emptySpaceCount++;
-            }
-        }
-    }
-
-    return emptySpaceCount;
 }
 
 function logElves(elves) {
@@ -226,5 +223,7 @@ function logElves(elves) {
         }
     }
 
-    console.log(output);
+    // console.log(output);
+
+    return output;
 }
