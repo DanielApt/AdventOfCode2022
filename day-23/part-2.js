@@ -41,7 +41,7 @@ console.log(main(sampleInput));
 console.log(`Process took ${process.hrtime(start)[0]} seconds`);
 
 start = process.hrtime();
-console.log(main(puzzleInput));
+console.log(main(puzzleInput)); // this took 13 minutes!
 console.log(`Process took ${process.hrtime(start)[0]} seconds`);
 
 /**
