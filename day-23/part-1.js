@@ -36,22 +36,12 @@ class Elf {
     }
 }
 
-console.log(
-    main(`.....
-..##.
-..#..
-.....
-..##.
-.....
-`)
-);
-
 let start = process.hrtime();
-// console.log(main(sampleInput));
+console.log(main(sampleInput));
 console.log(`Process took ${process.hrtime(start)[0]} seconds`);
 
 start = process.hrtime();
-// console.log(main(puzzleInput));
+console.log(main(puzzleInput));
 console.log(`Process took ${process.hrtime(start)[0]} seconds`);
 
 /**
@@ -66,8 +56,8 @@ function main(puzzleInput) {
     const checks = [
         getNorthMovement,
         getSouthMovement,
-        getEastMovement,
         getWestMovement,
+        getEastMovement,
     ];
 
     puzzleInput.split("\n").forEach((row, y) =>
@@ -82,7 +72,7 @@ function main(puzzleInput) {
 
     let totalRounds = 0;
 
-    while (totalRounds !== 10) {
+    while (totalRounds < 10) {
         round();
 
         totalRounds++;
@@ -95,11 +85,12 @@ function main(puzzleInput) {
         // create proposal for each
         elves.forEach((elf) => {
             const movement = checks.find((check) => check(elf));
-            const [newX, newY] = movement(elf);
-            elf.propose(newX, newY);
 
             if (isNotSurrounded(elf)) {
                 elf.clearProposal();
+            } else if (movement) {
+                const newPos = movement(elf);
+                elf.propose(newPos[0], newPos[1]);
             }
         });
 
@@ -117,6 +108,7 @@ function main(puzzleInput) {
         elves.forEach((elf) => elf.moveToProposal());
 
         // TODO: Log each step
+        console.log(`End of ${totalRounds + 1}:`);
         logElves(elves);
     }
 
@@ -213,6 +205,10 @@ function logElves(elves) {
     const xMax = Math.max(...xList);
     const yMin = Math.min(...yList);
     const yMax = Math.max(...yList);
+    // const xMin = -3;
+    // const xMax = 10;
+    // const yMin = -2;
+    // const yMax = 10;
 
     let y = yMin;
     let x = xMin;
