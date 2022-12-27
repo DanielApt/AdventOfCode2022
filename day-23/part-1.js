@@ -97,9 +97,11 @@ function main(puzzleInput) {
             const movement = checks.find((check) => check(elf));
             const [newX, newY] = movement(elf);
             elf.propose(newX, newY);
-        });
 
-        logElves(elves);
+            if (isNotSurrounded(elf)) {
+                elf.clearProposal();
+            }
+        });
 
         const proposals = elves.map((e) => e.getProposal());
 
@@ -116,6 +118,14 @@ function main(puzzleInput) {
 
         // TODO: Log each step
         logElves(elves);
+    }
+
+    function isNotSurrounded(elf) {
+        return (
+            checks.filter(
+                (checkFunction) => typeof checkFunction(elf) === "object"
+            ).length === checks.length
+        );
     }
 
     function getNorthMovement(elf) {
