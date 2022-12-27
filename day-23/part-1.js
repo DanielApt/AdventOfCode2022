@@ -31,10 +31,6 @@ class Elf {
         this.proposedY = null;
     }
 
-    getCoordinates() {
-        return [this.x, this.y];
-    }
-
     toString() {
         return "#";
     }
@@ -63,9 +59,16 @@ console.log(`Process took ${process.hrtime(start)[0]} seconds`);
  * @return {Number}
  */
 function main(puzzleInput) {
-    // Create 2d array of elves
-
     const elves = [];
+
+    // this is an array of checks. Elves will check if the first movement works, followed, by the second, etc.
+    // after each move, the order is shifted, with the first check going to the end
+    const checks = [
+        getNorthMovement,
+        getSouthMovement,
+        getEastMovement,
+        getWestMovement,
+    ];
 
     puzzleInput.split("\n").forEach((row, y) =>
         row.split("").forEach((point, x) => {
@@ -81,56 +84,19 @@ function main(puzzleInput) {
 
     while (totalRounds !== 10) {
         round();
+
         totalRounds++;
+
+        // move the first check to the back
+        checks.push(checks.shift());
     }
 
     function round() {
         // create proposal for each
         elves.forEach((elf) => {
-            const { x, y } = elf;
-
-            const n = elves.find((neighbour) =>
-                _.isEqual(neighbour.getCoordinates(), [x, y - 1])
-            );
-
-            const ne = elves.find((neighbour) =>
-                _.isEqual(neighbour.getCoordinates(), [x + 1, y - 1])
-            );
-
-            const e = elves.find((neighbour) =>
-                _.isEqual(neighbour.getCoordinates(), [x + 1, y])
-            );
-
-            const se = elves.find((neighbour) =>
-                _.isEqual(neighbour.getCoordinates(), [x + 1, y + 1])
-            );
-
-            const s = elves.find((neighbour) =>
-                _.isEqual(neighbour.getCoordinates(), [x, y + 1])
-            );
-
-            const sw = elves.find((neighbour) =>
-                _.isEqual(neighbour.getCoordinates(), [x - 1, y + 1])
-            );
-
-            const w = elves.find((neighbour) =>
-                _.isEqual(neighbour.getCoordinates(), [x - 1, y])
-            );
-
-            const nw = elves.find((neighbour) =>
-                _.isEqual(neighbour.getCoordinates(), [x - 1, y - 1])
-            );
-
-            // TODO: Go over these in another order
-            if (!n && !ne && !nw) {
-                elf.propose(x, y - 1);
-            } else if (!s && !se && !sw) {
-                elf.propose(x, y + 1);
-            } else if (!w && !sw && !nw) {
-                elf.propose(x - 1, y);
-            } else if (!e && !sw && !nw) {
-                elf.propose(x + 1, y);
-            }
+            const movement = checks.find((check) => check(elf));
+            const [newX, newY] = movement(elf);
+            elf.propose(newX, newY);
         });
 
         logElves(elves);
@@ -150,6 +116,62 @@ function main(puzzleInput) {
 
         // TODO: Log each step
         logElves(elves);
+    }
+
+    function getNorthMovement(elf) {
+        const { x, y } = elf;
+
+        const elvesInNorth = elves.find(
+            (e) => Math.abs(e.x - elf.x) <= 1 && e.y === elf.y - 1
+        );
+
+        if (elvesInNorth) {
+            return false;
+        } else {
+            return [x, y - 1];
+        }
+    }
+
+    function getSouthMovement(elf) {
+        const { x, y } = elf;
+
+        const elvesInSouth = elves.find(
+            (e) => Math.abs(e.x - elf.x) <= 1 && e.y === elf.y + 1
+        );
+
+        if (elvesInSouth) {
+            return false;
+        } else {
+            return [x, y + 1];
+        }
+    }
+
+    function getWestMovement(elf) {
+        const { x, y } = elf;
+
+        const elvesInWest = elves.find(
+            (e) => e.x === elf.x - 1 && Math.abs(e.y - elf.y) <= 1
+        );
+
+        if (elvesInWest) {
+            return false;
+        } else {
+            return [x - 1, y];
+        }
+    }
+
+    function getEastMovement(elf) {
+        const { x, y } = elf;
+
+        const elvesInEast = elves.find(
+            (e) => e.x === elf.x + 1 && Math.abs(e.y - elf.y) <= 1
+        );
+
+        if (elvesInEast) {
+            return false;
+        } else {
+            return [x + 1, y];
+        }
     }
 
     const xList = elves.map((elf) => elf.x);
