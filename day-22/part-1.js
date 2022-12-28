@@ -44,7 +44,7 @@ console.log(`Process took ${process.hrtime(start)[0]} seconds`);
  */
 function main(puzzleInput) {
     const [mapInput, instructionInput] = puzzleInput.split("\n\n");
-    const instructions = instructionInput.match(/\d+[A-Z]/g);
+    const instructions = instructionInput.match(/\d+|[A-Z]/g);
 
     const map = mapInput.split("\n").map((row) => row.split(""));
 
@@ -57,45 +57,43 @@ function main(puzzleInput) {
 
     // parse every instruction
     instructions.forEach((instruction) => {
-        const match = instruction.split(/(\d+)([A-Z])/);
-        const movement = Number(match[1]);
-        const rotation = match[2];
+        if (instruction.match(/\d/)) {
+            const movement = Number(instruction);
+            step(movement);
+        } else {
+            // rotate
+            if (instruction === "R") {
+                switch (direction) {
+                    case EAST:
+                        direction = SOUTH;
+                        break;
+                    case SOUTH:
+                        direction = WEST;
+                        break;
 
-        // move until we hit a wall or reach our end-point
-        step(movement);
+                    case WEST:
+                        direction = NORTH;
+                        break;
 
-        // rotate
-        if (rotation === "R") {
-            switch (direction) {
-                case EAST:
-                    direction = SOUTH;
-                    break;
-                case SOUTH:
-                    direction = WEST;
-                    break;
+                    case NORTH:
+                        direction = EAST;
+                }
+            } else if (instruction === "L") {
+                switch (direction) {
+                    case EAST:
+                        direction = NORTH;
+                        break;
+                    case NORTH:
+                        direction = WEST;
+                        break;
 
-                case WEST:
-                    direction = NORTH;
-                    break;
+                    case WEST:
+                        direction = SOUTH;
+                        break;
 
-                case NORTH:
-                    direction = EAST;
-            }
-        } else if (rotation === "L") {
-            switch (direction) {
-                case EAST:
-                    direction = NORTH;
-                    break;
-                case NORTH:
-                    direction = WEST;
-                    break;
-
-                case WEST:
-                    direction = SOUTH;
-                    break;
-
-                case SOUTH:
-                    direction = EAST;
+                    case SOUTH:
+                        direction = EAST;
+                }
             }
         }
     });
